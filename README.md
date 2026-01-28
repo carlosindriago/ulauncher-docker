@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐳 Ulauncher Docker Extension (Modernized)
+<h1>Ulauncher Docker Extension (Modernized)</h1>
 
 [![Maintenance](https://img.shields.io/badge/Maintenance-Active-success.svg)](https://github.com/carlosindriago/ulauncher-docker)
 [![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://python.org)
@@ -14,7 +14,7 @@
 
 ---
 
-## 📸 Demo
+## Demo
 
 ![Demo](https://github.com/carlosindriago/ulauncher-docker/blob/main/demo.gif)
 
@@ -28,7 +28,7 @@ The extension in action - listing containers, managing lifecycle, viewing logs, 
 
 ---
 
-## 🚀 Why this Fork? (Key Changes)
+## Why this Fork? (Key Changes)
 
 The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker) repository has been unmaintained since 2019, with outdated dependencies and several issues preventing it from working on modern Linux distributions. This fork addresses those issues with significant technical improvements:
 
@@ -55,7 +55,7 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
 
 ---
 
-## ✨ Features
+## Features
 
 - 📋 **List running containers** - View all active Docker containers with one command
 - 🖥️ **Start/Stop/Restart** - Manage container lifecycle directly from Ulauncher
@@ -68,7 +68,7 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before using this extension, ensure you have:
 
@@ -86,7 +86,7 @@ Before using this extension, ensure you have:
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ### 1. Clone the Repository
 
@@ -120,7 +120,7 @@ Open Ulauncher and type `dk ` (with trailing space). You should see a list of ru
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Select Your Terminal
 
@@ -144,7 +144,7 @@ The extension supports multiple terminals. To change it:
 
 ---
 
-## 💻 Usage
+## Usage
 
 Open Ulauncher and type one of the following commands:
 
@@ -173,7 +173,7 @@ When you select a container from the list:
 
 ---
 
-## 🤝 How to Contribute
+## How to Contribute
 
 We welcome contributions from the community! This is an open-source project maintained by volunteers.
 
@@ -201,7 +201,7 @@ We welcome contributions from the community! This is an open-source project main
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -213,7 +213,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - The [Ulauncher](https://ulauncher.io/) team for the excellent launcher platform
 - [Docker](https://www.docker.com/) for the containerization technology
@@ -221,7 +221,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## Support
 
 If you encounter issues:
 
