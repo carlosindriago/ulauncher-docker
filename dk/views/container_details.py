@@ -17,6 +17,18 @@ class ContainerDetailsView():
     def __init__(self, extension):
         self.extension = extension
 
+    def _build_terminal_cmd(self, terminal_prog, command):
+        """
+        SENSEI FIX: Detecta si es XFCE para usar la bandera correcta (-x)
+        en lugar de la estándar (-e) de Gnome/Tilix.
+        """
+        if "xfce4-terminal" in terminal_prog:
+            # XFCE usa -x para ejecutar el resto de la línea
+            return "%s -x %s" % (terminal_prog, command)
+        
+        # Fallback para Gnome Terminal, Tilix, etc (usan -e)
+        return "%s -e %s" % (terminal_prog, command)
+
     def render(self, container_id):
         """ Show container details """
 
@@ -37,7 +49,8 @@ class ContainerDetailsView():
 
         attrs = container.attrs
 
-        ports = container.attrs['NetworkSettings']['Ports']
+        # Safety check for ports
+        ports = container.attrs['NetworkSettings'].get('Ports') or {}
 
         ports_list = []
         for container_port, host_mapping in ports.items():
@@ -50,8 +63,12 @@ class ContainerDetailsView():
         ip_address = container.attrs['NetworkSettings']['IPAddress']
 
         if not ip_address:
-            ips = attrs['NetworkSettings']['Networks'].values()
-            ip_address = list(ips)[0]['IPAddress']
+            # Manejo de redes personalizadas donde la IP está anidada
+            networks = attrs['NetworkSettings']['Networks']
+            if networks:
+                ip_address = list(networks.values())[0].get('IPAddress', 'Unknown')
+            else:
+                ip_address = "No IP"
 
         items.append(
             ExtensionResultItem(icon=self.extension.icon_path,
@@ -82,24 +99,27 @@ class ContainerDetailsView():
                     on_enter=OpenUrlAction(ip_address),
                     on_alt_enter=CopyToClipboardAction(ip_address)))
 
-            items.append(
-                ExtensionResultItem(
-                    icon='images/icon_ip.png',
-                    name="Ports",
-                    description='\n'.join(ports_list),
-                    highlightable=False,
-                    on_enter=HideWindowAction(),
-                ))
+            if ports_list:
+                items.append(
+                    ExtensionResultItem(
+                        icon='images/icon_ip.png',
+                        name="Ports",
+                        description='\n'.join(ports_list),
+                        highlightable=False,
+                        on_enter=HideWindowAction(),
+                    ))
+
+            # --- SENSEI MOD: Shell Command ---
+            shell_cmd_str = "docker exec -it %s sh" % container.short_id
+            final_shell_cmd = self._build_terminal_cmd(default_terminal, shell_cmd_str)
 
             items.append(
                 ExtensionResultItem(
                     icon='images/icon_terminal.png',
                     name="Open container shell",
-                    description="Opens a new sh shell in the container",
+                    description="Opens a new sh shell in the container (%s)" % default_terminal,
                     highlightable=False,
-                    on_enter=RunScriptAction(
-                        "%s -e docker exec -it %s sh" %
-                        (default_terminal, container.short_id), [])))
+                    on_enter=RunScriptAction(final_shell_cmd, [])))
 
             items.append(
                 ExtensionResultItem(icon='images/icon_stop.png',
@@ -124,15 +144,16 @@ class ContainerDetailsView():
                                         'id':
                                         container.short_id
                                     })))
+            
+            # --- SENSEI MOD: Logs Command ---
+            logs_cmd_str = "docker logs -f %s" % container.short_id
+            final_logs_cmd = self._build_terminal_cmd(default_terminal, logs_cmd_str)
 
             items.append(
                 ExtensionResultItem(icon='images/icon_logs.png',
                                     name="Logs",
                                     description="Show logs of the container",
                                     highlightable=False,
-                                    on_enter=RunScriptAction(
-                                        "%s -e docker logs -f %s" %
-                                        (default_terminal, container.short_id),
-                                        [])))
+                                    on_enter=RunScriptAction(final_logs_cmd, [])))
 
         return RenderResultListAction(items)

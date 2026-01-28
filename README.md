@@ -28,8 +28,8 @@ This extension also needs [docker-py](https://github.com/docker/docker-py).
 To install it, after installing the extension, run the following command on your terminal:
 
 ```bash
-cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
-pip3 install -r requirementx.txt
+ cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
+ pip3 install -r requirements.txt
 ```
 
 ## Install
@@ -42,7 +42,14 @@ https://github.com/brpaz/ulauncher-docker
 
 ## Usage
 
-On Ulauncher, type `Docker` to see the available commands:
+Open Ulauncher and type one of the following keywords (note the space after the keyword):
+
+- **`dk `** - List all running Docker containers
+- **`dk:info `** - Show Docker Daemon information
+- **`dk:prune `** - Cleanup unused Docker containers and images
+- **`dk:docs `** - Search Docker documentation
+
+> **Note:** Make sure to add a space after `dk` (e.g., `dk `) to activate the extension. Without the space, Ulauncher will show general search results instead of the extension commands.
 
 ![Extension Commands](./assets/screenshots/extension_demo.png)
 
