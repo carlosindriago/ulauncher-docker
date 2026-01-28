@@ -19,14 +19,17 @@ class ContainerDetailsView():
 
     def _build_terminal_cmd(self, terminal_prog, command):
         """
-        SENSEI FIX: Detecta si es XFCE para usar la bandera correcta (-x)
-        en lugar de la estándar (-e) de Gnome/Tilix.
+        Builds the terminal command based on the terminal program.
         """
-        if "xfce4-terminal" in terminal_prog:
-            # XFCE usa -x para ejecutar el resto de la línea
+        # Terminals that use -x
+        if terminal_prog in ["xfce4-terminal", "terminator"]:
             return "%s -x %s" % (terminal_prog, command)
-        
-        # Fallback para Gnome Terminal, Tilix, etc (usan -e)
+            
+        # Terminals that use -- (like kitty)
+        if terminal_prog in ["kitty"]:
+             return "%s -- %s" % (terminal_prog, command)
+
+        # Default to -e (gnome-terminal, tilix, alacritty, konsole, xterm, etc)
         return "%s -e %s" % (terminal_prog, command)
 
     def render(self, container_id):

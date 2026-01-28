@@ -51,6 +51,30 @@
         {
           "value": "tilix",
           "text": "Tilix"
+        },
+        {
+          "value": "xfce4-terminal",
+          "text": "XFCE Terminal"
+        },
+        {
+          "value": "alacritty",
+          "text": "Alacritty"
+        },
+        {
+          "value": "kitty",
+          "text": "Kitty"
+        },
+        {
+          "value": "konsole",
+          "text": "Konsole"
+        },
+        {
+          "value": "terminator",
+          "text": "Terminator"
+        },
+        {
+          "value": "xterm",
+          "text": "XTerm"
         }
       ]
     }

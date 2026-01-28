@@ -12,7 +12,7 @@
 
 ## 📸 Demo
 
-![Demo](https://github.com/carlosindriago/ulauncher-docker-modernized/blob/main/demo.gif)
+![Demo](https://github.com/carlosindriago/ulauncher-docker/blob/main/demo.gif)
 
 The extension in action - listing containers, managing lifecycle, viewing logs, and more:
 
@@ -35,20 +35,19 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
   - Full compatibility with Docker Engine API v1.45+
   - Maintains security and performance improvements from the latest Docker Python SDK
 
-- **XFCE4 Terminal Support**
-  - Added native support for `xfce4-terminal` (using `-x` flag instead of `-e`)
-  - Enables the extension to work seamlessly on MX Linux, Manjaro, and other XFCE-based distributions
-  - Auto-detects terminal type and applies correct flags
+- **Expanded Terminal Support**
+  - Added native support for **XFCE4 Terminal**, **Alacritty**, **Kitty**, **Konsole**, **Terminator**, and **XTerm**.
+  - Auto-detects terminal type and applies correct flags (e.g., `-x` for XFCE/Terminator, `--` for Kitty, `-e` for others).
 
 - **Robust Error Handling**
   - Extension no longer crashes if Docker Daemon is not running at startup
   - Graceful fallback with user-friendly notifications
   - Better error recovery and logging
 
-- **Fixed manifest.json Issues**
-  - Added missing `id` field required by Ulauncher 5.x
-  - Corrected typo in requirements.txt filename
-  - Proper keyword configuration
+- **Security Hardening**
+  - Input sanitization to prevent command injection
+  - Safe handling of notification text to prevent XSS-like issues
+  - Regex validation for container IDs and names
 
 ---
 
@@ -61,7 +60,7 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
 - 📋 **Copy IP/Ports** - Quick access to container networking information
 - 🧹 **Prune system** - Cleanup unused containers and images
 - 📚 **Documentation search** - Quick access to Docker docs
-- 🎯 **Multi-terminal support** - Works with GNOME Terminal, Tilix, XFCE4 Terminal
+- 🎯 **Multi-terminal support** - Works with GNOME Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, Konsole, Terminator, XTerm.
 
 ---
 
@@ -83,25 +82,20 @@ Before using this extension, ensure you have:
 
 ---
 
-## 🛠️ Installation (Developer/Manual Method)
-
-This extension is not yet published to the Ulauncher Extension Marketplace. Install it manually:
+## 🛠️ Installation
 
 ### 1. Clone the Repository
 
 ```bash
 cd ~/.local/share/ulauncher/extensions/
-git clone https://github.com/your-username/ulauncher-docker-modernized.git com.github.brpaz.ulauncher-docker
+git clone https://github.com/carlosindriago/ulauncher-docker.git com.github.brpaz.ulauncher-docker
 ```
 
 ### 2. Install Python Dependencies
 
-> **⚠️ Important for Debian 12 / MX Linux environments:**  
-> Due to PEP 668 system package restrictions, you must use `--break-system-packages` flag or create a virtual environment. The command below uses the flag for convenience.
-
 ```bash
 cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
-pip3 install -r requirements.txt --break-system-packages
+pip3 install -r requirements.txt
 ```
 
 ### 3. Restart Ulauncher
@@ -132,9 +126,12 @@ The extension supports multiple terminals. To change it:
 |----------|--------|--------|
 | GNOME Terminal | `gnome-terminal` | Default on Ubuntu/Fedora |
 | Tilix | `tilix` | Modern terminal emulator |
-| XFCE4 Terminal | `xfce4-terminal` | Native support with `-x` flag |
-
-> **Note:** XFCE4 Terminal users (MX Linux, Manjaro XFCE) now have full native support. The extension automatically uses the `-x` flag instead of `-e` when `xfce4-terminal` is selected.
+| XFCE4 Terminal | `xfce4-terminal` | Uses `-x` flag |
+| Alacritty | `alacritty` | Uses `-e` flag |
+| Kitty | `kitty` | Uses `--` flag |
+| Konsole | `konsole` | KDE Terminal |
+| Terminator | `terminator` | Uses `-x` flag |
+| XTerm | `xterm` | Classic terminal |
 
 ---
 
@@ -173,13 +170,6 @@ We welcome contributions from the community! This is an open-source project main
 
 ### Areas Where We Need Help
 
-- **Terminal Support**: We're looking to add support for more terminals:
-  - [ ] Alacritty
-  - [ ] Kitty
-  - [ ] Konsole (KDE)
-  - [ ] Terminology
-  - [ ] Others? Open an issue!
-
 - **Bug Reports**: If you find issues on your specific distribution, please file a bug report with:
   - Linux distribution and version (`cat /etc/os-release`)
   - Ulauncher version (`ulauncher --version`)
@@ -199,13 +189,6 @@ We welcome contributions from the community! This is an open-source project main
 3. **Commit** your changes (`git commit -m 'Add my feature'`)
 4. **Push** to your fork (`git push origin feature/my-feature`)
 5. **Open a Pull Request** with a clear description of your changes
-
-### Code Style
-
-- Follow PEP 8 style guidelines
-- Add type hints for new functions
-- Include docstrings for complex logic
-- Test on multiple distributions if possible (Ubuntu, Debian, MX, Fedora)
 
 ---
 
@@ -237,7 +220,7 @@ If you encounter issues:
 2. Verify Docker is running: `systemctl status docker`
 3. Verify user permissions: `groups $USER` (should include `docker`)
 4. Check Ulauncher logs: `ulauncher -v` and look for extension errors
-5. [Open an issue](https://github.com/carlosindriago/ulauncher-docker-modernized/issues) with details
+5. [Open an issue](https://github.com/carlosindriago/ulauncher-docker/issues) with details
 
 ---
 
