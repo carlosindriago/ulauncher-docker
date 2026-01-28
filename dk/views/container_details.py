@@ -32,6 +32,15 @@ class ContainerDetailsView():
     def render(self, container_id):
         """ Show container details """
 
+        if not self.extension.docker_available:
+             return RenderResultListAction([
+                ExtensionResultItem(
+                    icon=self.extension.icon_path,
+                    name='Docker is not running',
+                    description='Please start the Docker Daemon',
+                    on_enter=HideWindowAction())
+            ])
+
         try:
             container = self.extension.docker_client.containers.get(
                 container_id)

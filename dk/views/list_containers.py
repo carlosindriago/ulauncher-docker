@@ -16,6 +16,15 @@ class ListContainersView():
     def render(self, query, only_running=True):
         """ Lists the Containers """
 
+        if not self.extension.docker_available:
+             return RenderResultListAction([
+                ExtensionResultItem(
+                    icon=self.extension.icon_path,
+                    name='Docker is not running',
+                    description='Please start the Docker Daemon',
+                    on_enter=HideWindowAction())
+            ])
+
         filters = {}
         
         # SANITIZED: Validate and sanitize query to prevent command injection

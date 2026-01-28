@@ -32,7 +32,18 @@ class DockerExtension(Extension):
     def __init__(self):
         """ Initializes the extension """
         super(DockerExtension, self).__init__()
-        self.docker_client = docker.from_env()
+        
+        # SECURE: Initialize with error handling for Docker not running
+        try:
+            self.docker_client = docker.from_env()
+            self.docker_client.ping()  # Verify connection
+            self.docker_available = True
+        except Exception as e:
+            # Graceful fallback - don't crash if Docker is unavailable
+            logger.warning("Docker Daemon not available: %s", e)
+            self.docker_client = None
+            self.docker_available = False
+        
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
 
@@ -41,7 +52,11 @@ class DockerExtension(Extension):
         self.container_details_view = ContainerDetailsView(self)
         self.info_view = InfoView(self)
 
-        Notify.init("DockerExtension")
+        # SECURITY: Initialize notifications with error handling
+        try:
+            Notify.init("DockerExtension")
+        except Exception as e:
+            logger.error("Failed to initialize notifications: %s", e)
 
     def show_notification(self, text):
         """
@@ -49,7 +64,22 @@ class DockerExtension(Extension):
         Args:
           text (str): The text to display on the notification
         """
-        Notify.Notification.new("Docker", text).show()
+        # SECURITY: Validate and sanitize notification text
+        if not isinstance(text, str):
+            text = str(text)
+        
+        # Limit length to prevent notification overflow
+        if len(text) > 200:
+            text = text[:200] + "..."
+        
+        # Escape HTML characters to prevent XSS
+        from html import escape
+        safe_text = escape(text)
+        
+        try:
+            Notify.Notification.new("Docker", safe_text).show()
+        except Exception as e:
+            logger.error("Failed to show notification: %s", e)
 
     def show_docker_info(self):
         """ Shows Docker daemon information"""
@@ -69,14 +99,29 @@ class DockerExtension(Extension):
         Args:
           container_id (str): The container id
         """
+        # SECURITY: Validate container_id format
+        import re
+        if not re.match(r'^[a-f0-9]{12,64}$', container_id):
+            logger.error("Invalid container_id format: %s", container_id)
+            self.show_notification("Invalid container ID format")
+            return
+        
+        if not self.docker_available:
+            logger.error("Docker not available")
+            self.show_notification("Docker daemon is not running")
+            return
+        
         try:
             self.docker_client.containers.get(container_id).start()
-            self.show_notification("Container %s started with success" %
-                                   container_id)
+            self.show_notification("Container %s started successfully" %
+                                   container_id[:12])
+        except docker.errors.NotFound:
+            logger.error("Container not found: %s", container_id)
+            self.show_notification("Container not found")
         except Exception as e:
-            logger.error("Failed to start container {}", e)
+            logger.error("Failed to start container %s: %s", container_id, e)
             self.show_notification("Failed to start container %s" %
-                                   container_id)
+                                   container_id[:12])
 
     def stop_container(self, container_id):
         """
@@ -84,12 +129,17 @@ class DockerExtension(Extension):
         Args:
           container_id (str): The container id
         """
+        if not self.docker_available:
+            logger.error("Docker not available")
+            self.show_notification("Docker daemon is not running")
+            return
+
         try:
             self.docker_client.containers.get(container_id).stop()
             self.show_notification("Container %s stopped with success" %
                                    container_id)
         except Exception as e:
-            logger.error("Failed to stop container {}", e)
+            logger.error("Failed to stop container %s: %s", container_id, e)
             self.show_notification("Failed to stop container %s" %
                                    container_id)
 
@@ -99,12 +149,17 @@ class DockerExtension(Extension):
         Args:
           container_id (str): The container id
         """
+        if not self.docker_available:
+            logger.error("Docker not available")
+            self.show_notification("Docker daemon is not running")
+            return
+
         try:
             self.docker_client.containers.get(container_id).restart()
             self.show_notification("Container %s restarted with success" %
                                    container_id)
         except Exception as e:
-            logger.error("Failed to restart container {}", e)
+            logger.error("Failed to restart container %s: %s", container_id, e)
             self.show_notification("Failed to restart container %s" %
                                    container_id)
 
