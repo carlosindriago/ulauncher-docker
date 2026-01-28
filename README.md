@@ -10,6 +10,20 @@
 
 ---
 
+## 📸 Demo
+
+![Demo](https://github.com/carlosindriago/ulauncher-docker-modernized/blob/main/demo.gif)
+
+The extension in action - listing containers, managing lifecycle, viewing logs, and more:
+
+- **Quick Access**: Type `dk ` to instantly see all running containers
+- **Lifecycle Management**: Start, stop, or restart containers directly from Ulauncher
+- **Shell Access**: Open a terminal shell (`sh`) into any container with one click
+- **Log Monitoring**: Tail logs in your preferred terminal
+- **Network Info**: Copy container IP addresses to clipboard
+
+---
+
 ## 🚀 Why this Fork? (Key Changes)
 
 The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker) repository has been unmaintained since 2019, with outdated dependencies and several issues preventing it from working on modern Linux distributions. This fork addresses those issues with significant technical improvements:
