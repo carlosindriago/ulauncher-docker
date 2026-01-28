@@ -1,80 +1,231 @@
-# ulauncher-docker
+# ulauncher-docker-modernized
 
-> Manage your Docker containers from Ulauncher
+> Manage your Docker containers from Ulauncher - Modern fork of abandoned brpaz/ulauncher-docker extension, refactored for 2026
 
-[![Ulauncher Extension](https://img.shields.io/badge/Ulauncher-Extension-green.svg?style=for-the-badge)](https://ext.ulauncher.io/-/github-brpaz-ulauncher-docker)
-[![CI Status](https://img.shields.io/github/workflow/status/brpaz/ulauncher-docker/CI?color=orange&label=actions&logo=github&logoColor=orange&style=for-the-badge)](https://github.com/brpaz/ulauncher-docker/workflows)
-![License](https://img.shields.io/github/license/brpaz/ulauncher-docker.svg?style=for-the-badge)
+![Maintenance](https://img.shields.io/badge/Maintained-Active-success.svg)
+![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
+![Ulauncher](https://img.shields.io/badge/Ulauncher-5.0+-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+**Maintained by [Carlos Indriago](https://github.com/carlosindriago)** |
 
-## Demo
+---
 
-![Demo](demo.gif)
+## 🚀 Why this Fork? (Key Changes)
 
-## Features
+The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker) repository has been unmaintained since 2019, with outdated dependencies and several issues preventing it from working on modern Linux distributions. This fork addresses those issues with significant technical improvements:
 
-- Lists all running Docker containers
-- Display container name, image, ip and exposed ports.
-- Allow executing common actions on containers like tailing logs, open a shell, start, stop and restart.
-- And more
+### Technical Improvements
 
-## Requirements
+- **Migration to Docker SDK 7.x+**
+  - Upgraded from deprecated `docker~=5.0.3` to modern `docker>=7.0.0`
+  - Full compatibility with Docker Engine API v1.45+
+  - Maintains security and performance improvements from the latest Docker Python SDK
 
-- Ulauncher 5
-- Python >= 3
-- Docker daemon running on your machine
+- **XFCE4 Terminal Support**
+  - Added native support for `xfce4-terminal` (using `-x` flag instead of `-e`)
+  - Enables the extension to work seamlessly on MX Linux, Manjaro, and other XFCE-based distributions
+  - Auto-detects terminal type and applies correct flags
 
-This extension also needs [docker-py](https://github.com/docker/docker-py).
+- **Robust Error Handling**
+  - Extension no longer crashes if Docker Daemon is not running at startup
+  - Graceful fallback with user-friendly notifications
+  - Better error recovery and logging
 
-To install it, after installing the extension, run the following command on your terminal:
+- **Fixed manifest.json Issues**
+  - Added missing `id` field required by Ulauncher 5.x
+  - Corrected typo in requirements.txt filename
+  - Proper keyword configuration
+
+---
+
+## ✨ Features
+
+- 📋 **List running containers** - View all active Docker containers with one command
+- 🖥️ **Start/Stop/Restart** - Manage container lifecycle directly from Ulauncher
+- 📜 **View logs** - Tail container logs in your preferred terminal
+- 🐚 **Open shell** - Get instant shell access (`sh`) to any container
+- 📋 **Copy IP/Ports** - Quick access to container networking information
+- 🧹 **Prune system** - Cleanup unused containers and images
+- 📚 **Documentation search** - Quick access to Docker docs
+- 🎯 **Multi-terminal support** - Works with GNOME Terminal, Tilix, XFCE4 Terminal
+
+---
+
+## 📋 Prerequisites
+
+Before using this extension, ensure you have:
+
+- **Ulauncher 5.0+** installed and running
+- **Docker** installed and daemon running (`systemctl status docker`)
+- **Python 3.x** with `pip` package manager
+- **Docker permissions** for your user:
+
+  ```bash
+  # Add your user to the docker group
+  sudo usermod -aG docker $USER
+  
+  # Log out and back in for changes to take effect
+  ```
+
+---
+
+## 🛠️ Installation (Developer/Manual Method)
+
+This extension is not yet published to the Ulauncher Extension Marketplace. Install it manually:
+
+### 1. Clone the Repository
 
 ```bash
- cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
- pip3 install -r requirements.txt
+cd ~/.local/share/ulauncher/extensions/
+git clone https://github.com/your-username/ulauncher-docker-modernized.git com.github.brpaz.ulauncher-docker
 ```
 
-## Install
+### 2. Install Python Dependencies
 
-Open ulauncher preferences window -> extensions -> add extension and paste the following url:
+> **⚠️ Important for Debian 12 / MX Linux environments:**  
+> Due to PEP 668 system package restrictions, you must use `--break-system-packages` flag or create a virtual environment. The command below uses the flag for convenience.
 
-```
-https://github.com/brpaz/ulauncher-docker
-```
-
-## Usage
-
-Open Ulauncher and type one of the following keywords (note the space after the keyword):
-
-- **`dk `** - List all running Docker containers
-- **`dk:info `** - Show Docker Daemon information
-- **`dk:prune `** - Cleanup unused Docker containers and images
-- **`dk:docs `** - Search Docker documentation
-
-> **Note:** Make sure to add a space after `dk` (e.g., `dk `) to activate the extension. Without the space, Ulauncher will show general search results instead of the extension commands.
-
-![Extension Commands](./assets/screenshots/extension_demo.png)
-
-## Development
-
-```
-git clone https://github.com/brpaz/ulauncher-docker
-make link
+```bash
+cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
+pip3 install -r requirements.txt --break-system-packages
 ```
 
-The `make link` command will symlink the cloned repo into the appropriate location on the ulauncher extensions folder.
+### 3. Restart Ulauncher
 
-To see your changes, stop ulauncher and run it from the command line with: `ulauncher -v`.
+```bash
+killall ulauncher
+ulauncher -v
+```
 
-## Contributing
+### Verify Installation
 
-Contributions, issues and Features requests are welcome.
+Open Ulauncher and type `dk ` (with trailing space). You should see a list of running containers.
 
-## Show your support
+---
 
-<a href="https://www.buymeacoffee.com/Z1Bu6asGV" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+## ⚙️ Configuration
 
+### Select Your Terminal
 
-## License
+The extension supports multiple terminals. To change it:
 
-Copywright @ 2019 [Bruno Paz](https://github.com/brpaz)
+1. Open Ulauncher Preferences (`Ctrl+Alt+Space`, then Preferences)
+2. Go to **Extensions** tab
+3. Find **Docker** extension
+4. Set **Default Terminal** to your preference:
 
-This project is [MIT](LLICENSE) Licensed.
+| Terminal | Value | Notes |
+|----------|--------|--------|
+| GNOME Terminal | `gnome-terminal` | Default on Ubuntu/Fedora |
+| Tilix | `tilix` | Modern terminal emulator |
+| XFCE4 Terminal | `xfce4-terminal` | Native support with `-x` flag |
+
+> **Note:** XFCE4 Terminal users (MX Linux, Manjaro XFCE) now have full native support. The extension automatically uses the `-x` flag instead of `-e` when `xfce4-terminal` is selected.
+
+---
+
+## 💻 Usage
+
+Open Ulauncher and type one of the following commands:
+
+### Basic Commands
+
+| Command | Description |
+|----------|-------------|
+| `dk ` (with space) | List all running Docker containers |
+| `dk:info ` | Show Docker Daemon version and system info |
+| `dk:prune ` | Cleanup unused containers, networks, and images |
+| `dk:docs ` | Search Docker documentation |
+
+### Container Actions
+
+When you select a container from the list:
+
+- **Enter** - View container details (IP, ports, status)
+- **Start** - Start a stopped container
+- **Stop** - Stop a running container
+- **Restart** - Restart container (graceful)
+- **Open Shell** - Open a new terminal with `docker exec -it <id> sh`
+- **View Logs** - Open terminal with `docker logs -f <id>`
+- **Copy IP** - Copy container IP address to clipboard
+
+> **Tip:** Pressing `Space` after `dk` is required to activate the extension. Without it, Ulauncher shows general search results.
+
+---
+
+## 🤝 How to Contribute
+
+We welcome contributions from the community! This is an open-source project maintained by volunteers.
+
+### Areas Where We Need Help
+
+- **Terminal Support**: We're looking to add support for more terminals:
+  - [ ] Alacritty
+  - [ ] Kitty
+  - [ ] Konsole (KDE)
+  - [ ] Terminology
+  - [ ] Others? Open an issue!
+
+- **Bug Reports**: If you find issues on your specific distribution, please file a bug report with:
+  - Linux distribution and version (`cat /etc/os-release`)
+  - Ulauncher version (`ulauncher --version`)
+  - Terminal you're using
+  - Steps to reproduce
+
+- **Code Improvements**: Feel free to submit pull requests for:
+  - New container actions
+  - UI enhancements
+  - Performance optimizations
+  - Additional Docker features (compose, swarm, etc.)
+
+### Contribution Workflow
+
+1. **Fork** this repository
+2. **Create a branch** for your feature/fix (`git checkout -b feature/my-feature`)
+3. **Commit** your changes (`git commit -m 'Add my feature'`)
+4. **Push** to your fork (`git push origin feature/my-feature`)
+5. **Open a Pull Request** with a clear description of your changes
+
+### Code Style
+
+- Follow PEP 8 style guidelines
+- Add type hints for new functions
+- Include docstrings for complex logic
+- Test on multiple distributions if possible (Ubuntu, Debian, MX, Fedora)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Credits
+
+- **Original Author**: [Bruno Paz](https://github.com/brpaz) - Created the original `ulauncher-docker` extension (2019)
+- **Current Maintainer**: [Carlos Indriago](https://github.com/carlosindriago) - Modern fork maintainer (2026)
+- **Community**: All contributors who improve this extension
+
+---
+
+## 🙏 Acknowledgments
+
+- The [Ulauncher](https://ulauncher.io/) team for the excellent launcher platform
+- [Docker](https://www.docker.com/) for the containerization technology
+- Original `ulauncher-docker` contributors for the foundational work
+
+---
+
+## 📞 Support
+
+If you encounter issues:
+
+1. Check out **Usage** section for proper command syntax
+2. Verify Docker is running: `systemctl status docker`
+3. Verify user permissions: `groups $USER` (should include `docker`)
+4. Check Ulauncher logs: `ulauncher -v` and look for extension errors
+5. [Open an issue](https://github.com/carlosindriago/ulauncher-docker-modernized/issues) with details
+
+---
+
+*Last updated: January 2026*  
+*Maintained with ❤️ by [Carlos Indriago](https://github.com/carlosindriago)*
