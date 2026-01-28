@@ -110,7 +110,9 @@ class ContainerDetailsView():
                     ))
 
             # --- SENSEI MOD: Shell Command ---
-            shell_cmd_str = "docker exec -it %s sh" % container.short_id
+            # SANITIZED: Use shlex.quote to prevent command injection
+            import shlex
+            shell_cmd_str = "docker exec -it %s sh" % shlex.quote(container.short_id)
             final_shell_cmd = self._build_terminal_cmd(default_terminal, shell_cmd_str)
 
             items.append(
@@ -145,8 +147,9 @@ class ContainerDetailsView():
                                         container.short_id
                                     })))
             
-            # --- SENSEI MOD: Logs Command ---
-            logs_cmd_str = "docker logs -f %s" % container.short_id
+            # SANITIZED: Use shlex.quote to prevent command injection
+            import shlex
+            logs_cmd_str = "docker logs -f %s" % shlex.quote(container.short_id)
             final_logs_cmd = self._build_terminal_cmd(default_terminal, logs_cmd_str)
 
             items.append(

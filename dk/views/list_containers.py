@@ -17,8 +17,20 @@ class ListContainersView():
         """ Lists the Containers """
 
         filters = {}
-
+        
+        # SANITIZED: Validate and sanitize query to prevent command injection
         if query:
+            import re
+            # Only allow alphanumeric, hyphens, underscores, and dots
+            if not re.match(r'^[a-zA-Z0-9._-]+$', query):
+                # Reject malicious queries
+                return RenderResultListAction([
+                    ExtensionResultItem(
+                        icon=self.extension.icon_path,
+                        name='Invalid container name',
+                        description='Container names can only contain letters, numbers, hyphens, underscores, and dots',
+                        on_enter=HideWindowAction())
+                ])
             filters["name"] = query
 
         if only_running:
