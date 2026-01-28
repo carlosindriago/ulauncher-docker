@@ -1,12 +1,16 @@
-# ulauncher-docker-modernized
+<div align="center">
 
-> Manage your Docker containers from Ulauncher - Modern fork of abandoned brpaz/ulauncher-docker extension, refactored for 2026
+# 🐳 Ulauncher Docker Extension (Modernized)
 
-![Maintenance](https://img.shields.io/badge/Maintained-Active-success.svg)
-![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
-![Ulauncher](https://img.shields.io/badge/Ulauncher-5.0+-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-**Maintained by [Carlos Indriago](https://github.com/carlosindriago)** |
+[![Maintenance](https://img.shields.io/badge/Maintenance-Active-success.svg)](https://github.com/carlosindriago/ulauncher-docker)
+[![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://python.org)
+[![Ulauncher](https://img.shields.io/badge/Ulauncher-v5-orange.svg)](https://ulauncher.io)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
+
+**Manage your Docker containers from Ulauncher - Refactored for 2026**
+*Maintained by Carlos Indriago*
+
+</div>
 
 ---
 
@@ -95,7 +99,12 @@ git clone https://github.com/carlosindriago/ulauncher-docker.git com.github.brpa
 
 ```bash
 cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
+
+# For standard systems:
 pip3 install -r requirements.txt
+
+# ⚠️ For Debian 12 / MX Linux / Ubuntu 24.04+ (if you get "externally-managed-environment" error):
+pip3 install -r requirements.txt --break-system-packages
 ```
 
 ### 3. Restart Ulauncher
