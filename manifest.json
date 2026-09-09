@@ -2,7 +2,7 @@
   "required_api_version": "^2.0.0",
   "name": "Docker",
   "description": "Manage your Docker containers from Ulauncher",
-  "developer_name": "Bruno Paz",
+  "developer_name": "Carlos Indriago",
   "icon": "images/icon.png",
   "options": {
     "query_debounce": 0.2
