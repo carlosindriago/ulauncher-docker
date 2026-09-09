@@ -7,11 +7,11 @@ class KeywordQueryEventListener(EventListener):
     # pylint: disable=unused-argument,no-self-use
     def on_event(self, event, extension):
         """ Handles the event """
-        
+
         # SANITIZED: Validate and sanitize query to prevent command injection
         import re
         query = event.get_argument() or ""
-        
+
         # Only allow alphanumeric, spaces, and basic punctuation
         if query and not re.match(r'^[a-zA-Z0-9\s._-]+$', query):
             # Reject malicious queries
@@ -25,14 +25,14 @@ class KeywordQueryEventListener(EventListener):
                     description='Query contains invalid characters',
                     on_enter=HideWindowAction())
             ])
-        
+
         kw = self.get_keyword_id(extension, event.get_keyword())
 
         if kw == "kw_info":
             return extension.show_docker_info()
 
         if kw == "kw_prune":
-            return extension.prune()
+            return extension.confirm_prune()
 
         if kw == "kw_documentation":
             return extension.search_documentation(query)

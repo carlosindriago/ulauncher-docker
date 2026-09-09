@@ -1,6 +1,12 @@
 import logging
 from ulauncher.api.client.EventListener import EventListener
-from dk.actions import ACTION_RESTART_CONTAINER, ACTION_STOP_CONTAINER, ACTION_START_CONTAINER, ACTION_DETAIL_CONTAINER
+from dk.actions import (
+    ACTION_RESTART_CONTAINER,
+    ACTION_STOP_CONTAINER,
+    ACTION_START_CONTAINER,
+    ACTION_DETAIL_CONTAINER,
+    ACTION_CONFIRM_PRUNE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,3 +33,7 @@ class ItemEnterEventListener(EventListener):
 
         if data['action'] == ACTION_DETAIL_CONTAINER:
             return extension.show_container_details(data['container_id'])
+
+        if data['action'] == ACTION_CONFIRM_PRUNE:
+            logger.info("Pruning Docker system (user confirmed)")
+            return extension.prune()

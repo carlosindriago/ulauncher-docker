@@ -5,23 +5,26 @@ Manage your Docker containers from Ulauncher
 
 import logging
 import gi
-import docker
-import subprocess
-from gi.repository import Notify
-from ulauncher.api.client.Extension import Extension
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
-from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-
-from dk.listeners.query_listener import KeywordQueryEventListener
-from dk.listeners.item_enter_listener import ItemEnterEventListener
-from dk.views.container_details import ContainerDetailsView
-from dk.views.info import InfoView
-from dk.views.list_containers import ListContainersView
 
 gi.require_version('Notify', '0.7')
+
+import docker  # noqa: E402
+import subprocess  # noqa: E402
+from gi.repository import Notify  # noqa: E402
+from ulauncher.api.client.Extension import Extension  # noqa: E402
+from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent  # noqa: E402
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction  # noqa: E402
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction  # noqa: E402
+from ulauncher.api.shared.action.HideWindowAction import HideWindowAction  # noqa: E402
+from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction  # noqa: E402
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem  # noqa: E402
+
+from dk.actions import ACTION_CONFIRM_PRUNE  # noqa: E402
+from dk.listeners.query_listener import KeywordQueryEventListener  # noqa: E402
+from dk.listeners.item_enter_listener import ItemEnterEventListener  # noqa: E402
+from dk.views.container_details import ContainerDetailsView  # noqa: E402
+from dk.views.info import InfoView  # noqa: E402
+from dk.views.list_containers import ListContainersView  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +35,16 @@ class DockerExtension(Extension):
     def __init__(self):
         """ Initializes the extension """
         super(DockerExtension, self).__init__()
-        
-        # SECURE: Initialize with error handling for Docker not running
+
+        # SECURE: Initialize with error handling for Docker not running.
+        # The actual availability is re-checked on every access via the
+        # `docker_available` property below, so this only creates the client.
         try:
             self.docker_client = docker.from_env()
-            self.docker_client.ping()  # Verify connection
-            self.docker_available = True
         except Exception as e:
-            # Graceful fallback - don't crash if Docker is unavailable
-            logger.warning("Docker Daemon not available: %s", e)
+            logger.warning("Could not initialize Docker client: %s", e)
             self.docker_client = None
-            self.docker_available = False
-        
+
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
 
@@ -58,6 +59,22 @@ class DockerExtension(Extension):
         except Exception as e:
             logger.error("Failed to initialize notifications: %s", e)
 
+    @property
+    def docker_available(self):
+        """
+        Re-checks Docker daemon availability on every access, so the extension
+        recovers automatically if the daemon starts (or stops) after Ulauncher
+        has already launched, without requiring a restart.
+        """
+        try:
+            if self.docker_client is None:
+                self.docker_client = docker.from_env()
+            self.docker_client.ping()
+            return True
+        except Exception as e:
+            logger.warning("Docker Daemon not available: %s", e)
+            return False
+
     def show_notification(self, text):
         """
         Shows a notification
@@ -67,15 +84,15 @@ class DockerExtension(Extension):
         # SECURITY: Validate and sanitize notification text
         if not isinstance(text, str):
             text = str(text)
-        
+
         # Limit length to prevent notification overflow
         if len(text) > 200:
             text = text[:200] + "..."
-        
+
         # Escape HTML characters to prevent XSS
         from html import escape
         safe_text = escape(text)
-        
+
         try:
             Notify.Notification.new("Docker", safe_text).show()
         except Exception as e:
@@ -86,8 +103,19 @@ class DockerExtension(Extension):
         return self.info_view.render()
 
     def list_containers(self, query):
-        """ Lists running containers"""
-        return self.list_containers_view.render(query)
+        """
+        Lists containers matching the query. Only running containers are
+        shown by default; prefix the query with "-a" (e.g. "dk -a nginx")
+        to include stopped containers too.
+        """
+        show_all = False
+        if query:
+            parts = query.split()
+            if parts[0] == "-a":
+                show_all = True
+                query = " ".join(parts[1:])
+
+        return self.list_containers_view.render(query, only_running=not show_all)
 
     def show_container_details(self, container_id):
         """ Show the details of the container with the specified id"""
@@ -105,12 +133,12 @@ class DockerExtension(Extension):
             logger.error("Invalid container_id format: %s", container_id)
             self.show_notification("Invalid container ID format")
             return
-        
+
         if not self.docker_available:
             logger.error("Docker not available")
             self.show_notification("Docker daemon is not running")
             return
-        
+
         try:
             self.docker_client.containers.get(container_id).start()
             self.show_notification("Container %s started successfully" %
@@ -137,11 +165,11 @@ class DockerExtension(Extension):
         try:
             self.docker_client.containers.get(container_id).stop()
             self.show_notification("Container %s stopped with success" %
-                                   container_id)
+                                   container_id[:12])
         except Exception as e:
             logger.error("Failed to stop container %s: %s", container_id, e)
             self.show_notification("Failed to stop container %s" %
-                                   container_id)
+                                   container_id[:12])
 
     def restart_container(self, container_id):
         """
@@ -157,11 +185,26 @@ class DockerExtension(Extension):
         try:
             self.docker_client.containers.get(container_id).restart()
             self.show_notification("Container %s restarted with success" %
-                                   container_id)
+                                   container_id[:12])
         except Exception as e:
             logger.error("Failed to restart container %s: %s", container_id, e)
             self.show_notification("Failed to restart container %s" %
-                                   container_id)
+                                   container_id[:12])
+
+    def confirm_prune(self):
+        """
+        Shows a confirmation prompt before running the destructive prune
+        command, instead of running it immediately on `dk:prune`.
+        """
+        return RenderResultListAction([
+            ExtensionResultItem(
+                icon=self.icon_path,
+                name="Confirm: remove ALL unused containers, networks and images",
+                description="This action is irreversible. Press Enter to proceed.",
+                highlightable=False,
+                on_enter=ExtensionCustomAction({'action': ACTION_CONFIRM_PRUNE},
+                                               keep_app_open=False))
+        ])
 
     def prune(self):
         """ Run docker system prune command"""

@@ -16,7 +16,7 @@ class InfoView():
     def render(self):
         """ Show docker info """
         if not self.extension.docker_available:
-             return RenderResultListAction([
+            return RenderResultListAction([
                 ExtensionResultItem(
                     icon='images/icon.png',
                     name='Docker is not running',
