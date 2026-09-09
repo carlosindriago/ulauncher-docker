@@ -44,7 +44,7 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
   - Auto-detects terminal type and applies correct flags (e.g., `-x` for XFCE/Terminator, `--` for Kitty, `-e` for others).
 
 - **Robust Error Handling**
-  - Extension no longer crashes if Docker Daemon is not running at startup
+  - Docker availability is re-checked on every action (not just once at startup), so the extension recovers automatically if the daemon starts or stops later
   - Graceful fallback with user-friendly notifications
   - Better error recovery and logging
 
@@ -52,17 +52,28 @@ The original [brpaz/ulauncher-docker](https://github.com/brpaz/ulauncher-docker)
   - Input sanitization to prevent command injection
   - Safe handling of notification text to prevent XSS-like issues
   - Regex validation for container IDs and names
+  - `dk:prune` now asks for confirmation before deleting anything - it used to run immediately
+
+- **Container History & Live Monitoring**
+  - `dk -a` lists containers of any status with a relative "up 2h 15m" / "stopped 3d ago" hint, and lets you start a stopped one straight from the list
+  - Container details show live **Uptime** and **CPU/Memory usage**
+
+- **Test Suite & CI**
+  - 77+ automated tests (`pytest`) covering the listeners, views and the extension's core logic
+  - GitHub Actions runs `flake8` and the full test suite on every push/PR
 
 ---
 
 ## Features
 
 - 📋 **List running containers** - View all active Docker containers with one command
+- 🕓 **Container history** - `dk -a` lists any container, running or not, with a relative "up"/"stopped" hint - and starts a stopped one with a single Enter
+- 📊 **Resource monitoring** - See CPU %, memory usage/limit and uptime in a container's details
 - 🖥️ **Start/Stop/Restart** - Manage container lifecycle directly from Ulauncher
 - 📜 **View logs** - Tail container logs in your preferred terminal
 - 🐚 **Open shell** - Get instant shell access (`sh`) to any container
 - 📋 **Copy IP/Ports** - Quick access to container networking information
-- 🧹 **Prune system** - Cleanup unused containers and images
+- 🧹 **Prune system** - Cleanup unused containers and images, with a confirmation step first
 - 📚 **Documentation search** - Quick access to Docker docs
 - 🎯 **Multi-terminal support** - Works with GNOME Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, Konsole, Terminator, XTerm.
 
@@ -97,15 +108,23 @@ git clone https://github.com/carlosindriago/ulauncher-docker.git com.github.brpa
 
 ### 2. Install Python Dependencies
 
+Ulauncher runs extensions with the **system** `python3` interpreter, so the `docker` module must be importable from there — not from a venv or an isolated user environment.
+
 ```bash
 cd ~/.local/share/ulauncher/extensions/com.github.brpaz.ulauncher-docker
 
-# For standard systems:
-pip3 install -r requirements.txt
+# Recommended for Debian/Ubuntu (installs into the system python3, no pip needed):
+sudo apt install python3-docker
 
-# ⚠️ For Debian 12 / MX Linux / Ubuntu 24.04+ (if you get "externally-managed-environment" error):
-pip3 install -r requirements.txt --break-system-packages
+# Alternative via pip, if your distro has no packaged python3-docker:
+pip3 install -r requirements.txt --user
+
+# ⚠️ For Debian 12+ / MX Linux / Ubuntu 24.04+ (if you get "externally-managed-environment" error):
+pip3 install -r requirements.txt --user --break-system-packages
 ```
+
+> **"could not import module docker" error in Ulauncher?**
+> This means the `docker` module isn't visible to Ulauncher's `python3`. Check that `pip3` itself is installed (`sudo apt install python3-pip`) before retrying, or use the `python3-docker` system package above.
 
 ### 3. Restart Ulauncher
 
@@ -153,6 +172,8 @@ Open Ulauncher and type one of the following commands:
 | Command | Description |
 |----------|-------------|
 | `dk ` (with space) | List all running Docker containers |
+| `dk -a ` | List **all** containers (including stopped ones), with a relative "up 2h 15m" / "stopped 3d ago" hint |
+| `dk -a nginx` | List all containers (any status) matching "nginx" |
 | `dk:info ` | Show Docker Daemon version and system info |
 | `dk:prune ` | Cleanup unused containers, networks, and images |
 | `dk:docs ` | Search Docker documentation |
@@ -161,15 +182,37 @@ Open Ulauncher and type one of the following commands:
 
 When you select a container from the list:
 
-- **Enter** - View container details (IP, ports, status)
-- **Start** - Start a stopped container
+- **Enter** - Opens container details for a running container (IP, uptime, CPU/memory usage, ports); **starts it directly** for a stopped one
+- **Alt+Enter** (on a stopped container) - View its details instead of starting it
+- **Start** - Start a stopped container (also available from the details view)
 - **Stop** - Stop a running container
 - **Restart** - Restart container (graceful)
 - **Open Shell** - Open a new terminal with `docker exec -it <id> sh`
 - **View Logs** - Open terminal with `docker logs -f <id>`
 - **Copy IP** - Copy container IP address to clipboard
 
+### Resource Usage & Uptime
+
+Opening the details of a **running** container (Enter on it) also shows:
+
+- **Uptime** - how long it's been running, e.g. `2h 15m`
+- **Resource Usage** - live CPU % and memory usage/limit, e.g. `CPU 0.3% · Mem 45.2 MiB / 15.3 GiB (0.3%)`
+
+This reads live stats from the Docker daemon, so opening the details of a running container takes about a second longer than usual.
+
 > **Tip:** Pressing `Space` after `dk` is required to activate the extension. Without it, Ulauncher shows general search results.
+
+---
+
+## Development
+
+```bash
+make deps-dev   # Install docker, flake8, pytest and pre-commit
+make lint       # Run flake8
+make test       # Run the test suite (pytest)
+```
+
+CI runs both `make lint` and `make test` on every push/PR.
 
 ---
 
@@ -233,5 +276,5 @@ If you encounter issues:
 
 ---
 
-*Last updated: January 2026*  
+*Last updated: September 2026*  
 *Maintained with ❤️ by [Carlos Indriago](https://github.com/carlosindriago)*
