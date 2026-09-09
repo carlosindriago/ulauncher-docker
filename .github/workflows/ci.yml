@@ -14,19 +14,26 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned to an LTS release the Ulauncher PPA is known to support -
+    # `ulauncher-latest` has previously lagged behind newer Ubuntu codenames.
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7
-      - name: Install dependencies
+      # Extension code imports the real `ulauncher` and `gi` (PyGObject)
+      # packages at module level, so tests run against the system python3
+      # (which sees the apt-installed packages below) instead of an
+      # isolated actions/setup-python interpreter.
+      - name: Install system dependencies (Ulauncher, GObject introspection)
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8
+          sudo add-apt-repository -y ppa:agornostal/ulauncher
+          sudo apt-get update
+          sudo apt-get install -y ulauncher python3-gi gir1.2-notify-0.7 python3-pip
+      - name: Install Python dependencies
+        run: pip3 install -r requirements-dev.txt
       - name: Lint with flake8
         run: make lint
+      - name: Run tests
+        run: make test
 
   release:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')

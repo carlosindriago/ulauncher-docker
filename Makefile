@@ -2,14 +2,17 @@
 EXT_NAME:=com.github.brpaz.ulauncher-docker
 EXT_DIR:=$(shell pwd)
 
-.PHONY: help lint format link unlink deps dev setup
+.PHONY: help lint test format link unlink deps deps-dev dev setup
 .DEFAULT_GOAL := help
 
-setup: ## Setups the project
+setup: deps-dev ## Setups the project
 	pre-commit install
 
 lint: ## Run Lint
 	@flake8
+
+test: ## Run the test suite
+	@pytest -v
 
 format: ## Format code using yapf
 	@yapf --in-place --recursive .
@@ -22,6 +25,9 @@ unlink: ## Unlink extension from Ulauncher
 
 deps: ## Install Python Dependencies
 	@pip3 install -r requirements.txt
+
+deps-dev: deps ## Install development dependencies (lint, tests, pre-commit)
+	@pip3 install -r requirements-dev.txt
 
 dev: ## Runs ulauncher on development mode
 	ulauncher -v --dev --no-extensions  |& grep "${EXT_NAME}"
